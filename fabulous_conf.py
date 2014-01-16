@@ -12,7 +12,7 @@ fabconf['SERVER_PRODUCTION_HOSTNAME'] = "ejrf-server"
 fabconf['SERVER_STAGING_HOSTNAME'] = "ejrf-test-server"
 
 # Username for connecting to instaces
-fabconf['SERVER_USERNAME'] = "ubuntu"
+fabconf['SERVER_USERNAME'] = "ejrf"
 
 # Domain name
 fabconf['DOMAIN_NAME'] = "app.ejrf"
@@ -30,7 +30,7 @@ fabconf['RELEASES_PATH'] = "%s/releases" % fabconf['DOMAIN_HOME']
 fabconf['SHARED_PATH'] = "%s/shared" % fabconf['DOMAIN_HOME']
 
 # GIT URL
-fabconf['GIT_URL'] = "git@github.com:eJRF/ejrf.git"
+fabconf['GIT_URL'] = "https://github.com/eJRF/ejrf"
 
 # Env file
 fabconf['ENV_FILE'] = "pip-requirements.txt"
@@ -69,7 +69,7 @@ fabconf['GITHUB_DEPLOY_KEY_NAME'] = "id_rsa"
 fabconf['GITHUB_DEPLOY_KEY_PATH'] = "%s/%s" % (fabconf['SSH_PATH'], fabconf['GITHUB_DEPLOY_KEY_NAME'])
 
 # Path to the repo of the application you want to install
-fabconf['GITHUB_REPO'] = "git@github.com:eJRF/ejrf.git"
+fabconf['GITHUB_REPO'] = "https://github.com/eJRF/ejrf"
 
 # Virtualenv path
 fabconf["VENV_PATH"] = "/home/ejrf/app/venv"
