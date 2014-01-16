@@ -12,7 +12,6 @@ def staging():
 
 def set_env(host=[fabconf['SERVER_PRODUCTION_HOSTNAME'], ]):
   env.user = fabconf['SERVER_USERNAME']
-  env.key_filename = fabconf['SSH_PRIVATE_KEY_PATH']
   env.hosts = host
   env.base_dir = fabconf['APPS_DIR']
   env.app_name = fabconf['PROJECT_NAME']
@@ -36,24 +35,20 @@ def releases():
 
 def start():
     """Start the application servers"""
-    sudo("supervisorctl start mics")
-
-def flush_memcache():
-    run("echo 'flush_all' | nc localhost 11211")
+    sudo("sudo service uwsgi start")
 
 def restart():
     """Restarts your application"""
-    flush_memcache()
-    sudo("supervisorctl restart mics")
+    sudo("sudo service uwsgi restart")
 
 def stop():
     """Stop the application servers"""
-    sudo("supervisorctl stop mics")
+    sudo("sudo service uwsgi stop")
 
 def permissions():
     """Make the release group-writable"""
     sudo("chmod -R g+w %(domain_path)s" % { 'domain_path':env.domain_path })
-    sudo("chown -R mics:mics %(domain_path)s" % { 'domain_path':env.domain_path })
+    sudo("chown -R ejrf:root %(domain_path)s" % { 'domain_path':env.domain_path })
 
 def setup():
     """Prepares one or more servers for deployment"""
@@ -85,26 +80,10 @@ def symlink():
         releases()
     run("rm -f %(current_path)s" % { 'current_path':env.current_path })
     run("ln -nfs %(current_release)s %(current_path)s" % { 'current_release':env.current_release, 'current_path':env.current_path })
-    place_gunicorn_conf()
-    place_newrelic_conf()
     run("ln -nfs %(shared_path)s/log %(current_release)s/log" % { 'shared_path':env.shared_path, 'current_release':env.current_release })
     run("ln -nfs %(shared_path)s/index %(current_release)s/index" % { 'shared_path':env.shared_path, 'current_release':env.current_release })
     run("ln -nfs %(shared_path)s/cdlm.db %(current_release)s/cdlm.db" % { 'shared_path':env.shared_path, 'current_release':env.current_release })
     run("ln -nfs %(shared_path)s/system/local.py %(current_release)s/%(app_name)s/local.py" % { 'shared_path':env.shared_path, 'current_release':env.current_release, 'app_name':env.app_name })
-    # run("ln -nfs %(virtual_env)s/src/django/django/contrib/admin/media %(current_release)s/%(app_name)s/media/admin" % { 'virtual_env': fabconf["VENV_PATH"], 'current_release':env.current_release, 'app_name':env.app_name })
-    copy_local_settings()
-
-def place_gunicorn_conf():
-    """Upload gunicorn conf file"""
-    local_path = "%s/templates/gunicorn.conf.py" % fabconf['FABULOUS_PATH']
-    remote_path = "%s/gunicorn.conf.py" % fabconf['PROJECT_PATH']
-    put(local_path, remote_path)
-
-def place_newrelic_conf():
-    """Upload newrelic conf file"""
-    local_path = "%s/templates/newrelic.ini" % fabconf['FABULOUS_PATH']
-    remote_path = "%s/newrelic.ini" % fabconf['PROJECT_PATH']
-    upload_template(filename = local_path, destination = remote_path, context = fabconf)
 
 def activate_virtualenv():
     """Activate virtual env"""
@@ -177,10 +156,6 @@ def rollback_code():
         env.current_release = "%(releases_path)s/%(current_revision)s" % { 'releases_path':env.releases_path, 'current_revision':env.current_revision }
         env.previous_release = "%(releases_path)s/%(previous_revision)s" % { 'releases_path':env.releases_path, 'previous_revision':env.previous_revision }
         run("rm %(current_path)s; ln -s %(previous_release)s %(current_path)s && rm -rf %(current_release)s" % { 'current_release':env.current_release, 'previous_release':env.previous_release, 'current_path':env.current_path })
-
-def copy_local_settings():
-    run("cp /home/mics/localsettings.py %(current_path)s/mics/localsettings.py" % {'current_path':env.current_path })
-    run("cp %(current_path)s/survey/investigator_configs.py.example %(current_path)s/survey/investigator_configs.py" % {'current_path':env.current_path })
 
 def rollback():
     """Rolls back to a previous version and restarts"""
