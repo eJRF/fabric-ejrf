@@ -2,17 +2,8 @@ from fabric.api import env, run, sudo, local, put
 from fabric.contrib.files import upload_template
 from fabulous_conf import *
 
-def production():
-    """Defines production environment"""
-    set_env()
-
-def staging():
-    """Defines staging environment"""
-    set_env(host=[fabconf['SERVER_STAGING_HOSTNAME'], ])
-
-def set_env(host=[fabconf['SERVER_PRODUCTION_HOSTNAME'], ]):
+def set_env():
   env.user = fabconf['SERVER_USERNAME']
-  env.hosts = host
   env.base_dir = fabconf['APPS_DIR']
   env.app_name = fabconf['PROJECT_NAME']
   env.domain_name = fabconf['DOMAIN_NAME']
@@ -170,5 +161,6 @@ def cold():
 
 def deploy():
     """Deploys your project. This calls both `update' and `restart'"""
+    set_env()
     update()
     restart()
